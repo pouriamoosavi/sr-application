@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Blank
+      Send To ESP {{espIP}}({{espPort}})
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,12 +9,18 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+      <ion-title size="large">Send To ESP {{espIP}}({{espPort}})</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <ion-item>
+    <ion-input placeholder="Message" type="text" name="msg" [(ngModel)]="msg" autofocus></ion-input>
+  </ion-item>
+  <ion-button type="button" color="primary" (click)="sendToEsp()" [disabled]="!buttonEnable"
+    expand="block" class="ion-text-capitalize">
+    Send
+  </ion-button>
+  <ion-icon name="bulb-outline"></ion-icon>
+  <pre>{{errorMsg}}</pre>
+  
 </ion-content>

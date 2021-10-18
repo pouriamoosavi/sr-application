@@ -9,7 +9,8 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "android:run": "export CAPACITOR_ANDROID_STUDIO_PATH='/snap/android-studio/current/android-studio/bin/studio.sh' && ionic cap sync android && ionic cap build android"
   },
   "private": true,
   "dependencies": {
@@ -19,12 +20,17 @@
     "@angular/platform-browser": "~12.1.1",
     "@angular/platform-browser-dynamic": "~12.1.1",
     "@angular/router": "~12.1.1",
+    "@capacitor/android": "3.2.5",
     "@capacitor/app": "1.0.5",
     "@capacitor/core": "3.2.5",
     "@capacitor/haptics": "1.1.2",
     "@capacitor/keyboard": "1.1.2",
     "@capacitor/status-bar": "1.0.5",
     "@ionic/angular": "^5.5.2",
+    "@ionic/storage-angular": "^3.0.6",
+    "@vendus/sockets-for-cordova": "^1.7.2",
+    "blocshop-sockets-for-cordova-plugin": "^1.1.0",
+    "raw-socket": "^1.7.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",
     "zone.js": "~0.11.4"

@@ -1,0 +1,28 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/setup"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Setup (step 2)</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-text>
+    <h6>
+      Input SSID (WIFI name) and password of the network you want your board to connect to. <br>
+    </h6>
+  </ion-text>
+  <ion-item>
+    <ion-input placeholder="SSID or WIFI name" type="text" name="userInputSsid" [(ngModel)]="userInputSsid"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-input placeholder="Password" type="text" name="userInputPass" [(ngModel)]="userInputPass"></ion-input>
+  </ion-item>
+  <ion-button type="button" color="primary" (click)="sendCredentials()" expand="block" [disabled]="connectButtonPending">
+    <span *ngIf="!connectButtonPending"> Connect </span>
+    <span *ngIf="connectButtonPending">
+      {{ connectButtonText }}<ion-spinner style="vertical-align: middle;" name="dots"></ion-spinner>
+    </span>
+  </ion-button>
+</ion-content>

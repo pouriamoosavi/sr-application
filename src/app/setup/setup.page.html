@@ -1,0 +1,56 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Setup (step 1)</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-text>
+    <h4>
+      Unfortunately we couldn't find your board's IP address.<br>
+    </h4>
+    <h5>
+      What may cause this problem?
+    </h5>
+    <h6>
+      <ul style="padding-left: 25px; line-height: 25px;">
+        <li>1- Your board is not setup properly.</li>
+        <li>2- You are not connected to the same network as your board does.</li>
+        <li>3- There is a problem with your network, board, mobile device or something else. (I know I'm a genius)</li>
+      </ul>
+    </h6>
+    <h5>
+      What you can do?<br>
+    </h5>
+    <h6>
+      1- If you already know the IP address of your board enter it below and tap Check:<br>
+    </h6>
+  </ion-text>
+  <ion-item>
+    <ion-input placeholder="Board IP" type="text" name="userInputBoardIP" [(ngModel)]="userInputBoardIP"></ion-input>
+  </ion-item>
+  <ion-button type="button" color="primary" (click)="checkBoardIP()" expand="block" [disabled]="checkButtonPending">
+    <span *ngIf="!checkButtonPending"> Check </span>
+    <span *ngIf="checkButtonPending">
+      {{ checkButtonText }}<ion-spinner style="vertical-align: middle;" name="dots"></ion-spinner>
+    </span>
+  </ion-button>
+  <ion-text>
+    <h6>
+      2- If not:<br>
+    </h6>
+    <h6>
+      <ul style="padding-left: 25px; line-height: 25px;">
+        <li>2.1- Restart Your board by pressing restart button or simply plug it off and on.</li>
+        <li>2.2- Turn you device's wifi on and look for a network named "esp32_SR:" followed by two other characters. Connect to this network. The default password is "password"</li>
+        <li>2.3- After you have successfully connected tap Connect.</li>
+      </ul>
+    </h6>
+  </ion-text>
+  <ion-button type="button" color="primary" (click)="connectBoardAP()" expand="block" [disabled]="connectButtonPending">
+    <span *ngIf="!connectButtonPending"> Connect </span>
+    <span *ngIf="connectButtonPending">
+      {{ connectButtonText }}<ion-spinner style="vertical-align: middle;" name="dots"></ion-spinner>
+    </span>
+  </ion-button>
+</ion-content>
