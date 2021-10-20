@@ -50,31 +50,24 @@ export class SocketService {
     });
   }
 
-  onData(func: Function) {
-    this.socket.onData = func;
-  }
+  // private onData(func: Function) {
+  //   this.socket.onData = func;
+  // }
 
   onDataObj(func: Function) {
     this.socket.onData = (dataArray: Uint8Array) => {
       try {
-        let out = {
-          reqOp: dataArray[0],
-          code: dataArray[1],
-          data: {},
-        };
-        let dataStr = '';
-        for (let i = 2; i < dataArray.length; i++) {
-          dataStr += String.fromCharCode(dataArray[i]);
+        if (dataArray.length > 0) {
+          let dataStr = '';
+          for (let i = 0; i < dataArray.length; i++) {
+            dataStr += String.fromCharCode(dataArray[i]);
+          }
+          if (dataStr) {
+            dataStr = dataStr.replace(/\0/g, '');
+            const parsed = JSON.parse(dataStr);
+            func(parsed);
+          }
         }
-        dataStr = dataStr.replace(/\0/g, '');
-        out.data = JSON.parse(dataStr);
-        func(out);
-        // const bb = new Blob([dataArray]);
-        // const f = new FileReader();
-        // f.onload = function (e) {
-        //   func(e.target.result);
-        // };
-        // f.readAsText(bb);
       } catch (err) {
         throw err;
       }
@@ -131,76 +124,12 @@ export class SocketService {
     return this.socket.state == Socket.State.OPENED;
   }
 
-  async sendReset() {
-    try {
-      let data = new Uint8Array(4);
-      data[0] = 0b00000100;
-      data[1] = 0;
-      data[2] = 0;
-      data[3] = 0b00000000;
-      await this.write(data);
-    } catch (err) {
-      throw err;
+  async send(command: string) {
+    let data = new Uint8Array(command.length + 1);
+    for (let i = 0; i < command.length; i++) {
+      data[i] = command.charCodeAt(i);
     }
-  }
-
-  async sendStSsid(ssid: String) {
-    try {
-      let data = new Uint8Array(ssid.length + 4);
-      data[0] = ssid.length + 4;
-      data[1] = 0;
-      data[2] = 0;
-      data[3] = 0b00000001;
-      for (let i = 0; i < ssid.length; i++) {
-        data[i] = ssid.charCodeAt(i);
-      }
-      await this.write(data);
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async sendStPass(pass: String) {
-    try {
-      let data = new Uint8Array(pass.length + 4);
-      data[0] = pass.length + 4;
-      data[1] = 0;
-      data[2] = 0;
-      data[3] = 0b00000010;
-      for (let i = 0; i < pass.length; i++) {
-        data[i] = pass.charCodeAt(i);
-      }
-      await this.write(data);
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async sendConnectToSt() {
-    try {
-      let data = new Uint8Array(4);
-      data[0] = 0b00000100;
-      data[1] = 0;
-      data[2] = 0;
-      data[3] = 0b00000011;
-      await this.write(data);
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async sendDisableAp() {}
-
-  async sendStatusCheck() {
-    try {
-      let data = new Uint8Array(4);
-      data[0] = 0b00000100;
-      data[1] = 0;
-      data[2] = 0;
-      data[3] = 0b00000101;
-      await this.write(data);
-    } catch (err) {
-      throw err;
-    }
+    data[command.length] = 0x0d;
+    await this.write(data);
   }
 }

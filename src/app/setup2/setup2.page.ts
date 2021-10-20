@@ -10,10 +10,11 @@ import { StorageService } from '../services/storage.service';
   styleUrls: ['./setup2.page.scss'],
 })
 export class Setup2Page implements OnInit {
-  userInputSsid: string;
   userInputPass: string;
   connectButtonPending: boolean;
   connectButtonText: string;
+  networks: [];
+  spin: boolean;
   constructor(
     private router: Router,
     private alertController: AlertController,
@@ -29,29 +30,42 @@ export class Setup2Page implements OnInit {
   }
 
   async ionViewDidEnter() {
+    console.log(100);
+    this.spin = true;
     try {
       await this.checkAndReconnect();
-      this.socketService.onData(async (data) => {
-        if (data[0] == 0b00000001 && data[1] != 0b00000000) {
-          // ssid result successful
-          await this.socketService.sendStPass(this.userInputPass); // send password
-        } else if (data[0] == 0b00000010 && data[1] != 0b00000000) {
-          // password result successful
-          this.connectButtonText = 'Trying to connect to network';
-          await this.socketService.sendConnectToSt(); // send connect
-        } else if (data[0] == 0b00000011 && data[1] != 0b11111111) {
-          // connect board to router as station successful
-          this.connectButtonText = 'Almost done';
-          let stIP = '';
-          for (let i = 2; i < data.length; i++) {
-            stIP += String(data[i]);
-          }
-          await this.storageService.set('espStationIP', stIP);
-          await this.router.navigate(['/lamp']);
-        } else {
+      this.socketService.onDataObj(async (dataObj: any) => {
+        this.spin = false;
+        if (dataObj.code != 0) {
           await this.showErr(
-            `Can't send SSID and/or password to the board. code: ${data[1]}`
+            `Can't send SSID and/or password to the board. op: ${dataObj.op}, code: ${dataObj.code}`
           );
+        } else {
+          if (dataObj.op == 'scan') {
+            if (dataObj.networks && Array.isArray(dataObj.networks)) {
+              for (let network of dataObj.networks) {
+                network.showPassAndConnect = false;
+              }
+              this.networks = dataObj.networks;
+              console.log(this.networks);
+              this.spin = false;
+              console.log(this);
+            } else {
+              await this.showErr(`'dataObj.networks' is not an array.`);
+            }
+          } else if (dataObj.op == 'ssid') {
+            // ssid result successful
+            await this.socketService.send(`pass ${this.userInputPass}`); // send password
+          } else if (dataObj.op == 'pass') {
+            // password result successful
+            this.connectButtonText = 'Trying to connect to network';
+            await this.socketService.send('connect'); // send connect
+          } else if (dataObj.op == 'connect') {
+            // connect board to router as station successful
+            this.connectButtonText = 'Almost done';
+            await this.storageService.set('espStationIP', dataObj.localIP);
+            await this.router.navigate(['/lamp']);
+          }
         }
       });
       this.socketService.onError(async (errorMessage) => {
@@ -65,19 +79,19 @@ export class Setup2Page implements OnInit {
     }
   }
 
-  ionViewWillLeave() {
-    this.socketService.safeClose();
+  async ionViewWillLeave() {
+    await this.socketService.safeClose();
   }
 
   async showErr(msg) {
+    this.spin = false;
+    this.resetButton();
     const alert = await this.alertController.create({
       header: 'Error',
       subHeader: 'Something went wrong',
       message: msg,
       buttons: ['OK'],
     });
-
-    this.resetButton();
     await alert.present();
   }
 
@@ -93,12 +107,17 @@ export class Setup2Page implements OnInit {
         this.resetButton();
       }
     }
+    this.socketService.send('scan');
   }
 
-  async sendCredentials() {
+  async sendCredentials(ssid: string) {
     await this.checkAndReconnect();
     this.connectButtonPending = true;
     this.connectButtonText = 'Sending credentials';
-    await this.socketService.sendStSsid(this.userInputPass); // send ssid
+    await this.socketService.send(`ssid ${ssid}`); // send ssid
+  }
+
+  log() {
+    this.spin = !this.spin;
   }
 }

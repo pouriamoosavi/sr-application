@@ -37,12 +37,12 @@ export class SetupPage implements OnInit {
 
     this.socketService.onDataObj(async (res) => {
       try {
-        let parsedData = res.data;
-        if (parsedData.ok) {
+        console.log(res);
+        if (res.code == 0) {
           this.router.navigate([this.nextStep]);
         } else {
           await this.showErr(
-            `Device response is not OK: ${JSON.stringify(parsedData)}`
+            `Device response is not OK: ${JSON.stringify(res)}`
           );
         }
       } catch (err) {
@@ -75,14 +75,13 @@ export class SetupPage implements OnInit {
   }
 
   async showErr(msg) {
+    this.resetButtons();
     const alert = await this.alertController.create({
       header: 'Error',
       subHeader: 'Something went wrong',
       message: msg,
       buttons: ['OK'],
     });
-
-    this.resetButtons();
     await alert.present();
   }
 
@@ -95,7 +94,7 @@ export class SetupPage implements OnInit {
       await this.socketService.open(ip, 8080);
       this.checkButtonText = 'Sending request';
       this.connectButtonText = 'Sending request';
-      await this.socketService.sendStatusCheck();
+      await this.socketService.send('status');
       this.resetButtons();
     } catch (err) {
       await this.showErr(err.message);

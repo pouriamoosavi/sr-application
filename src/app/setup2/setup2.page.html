@@ -4,25 +4,40 @@
       <ion-back-button defaultHref="/setup"></ion-back-button>
     </ion-buttons>
     <ion-title>Setup (step 2)</ion-title>
+    <ion-buttons slot="secondary">
+      <ion-button (click)="checkAndReconnect()">
+        <ion-icon slot="icon-only" name="reload-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <ion-text>
-    <h6>
-      Input SSID (WIFI name) and password of the network you want your board to connect to. <br>
-    </h6>
+    <h5>
+      Find the network you want your board to connect to (If you can't find your network it means the esp board does not see it.) <br>
+    </h5>
   </ion-text>
-  <ion-item>
-    <ion-input placeholder="SSID or WIFI name" type="text" name="userInputSsid" [(ngModel)]="userInputSsid"></ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-input placeholder="Password" type="text" name="userInputPass" [(ngModel)]="userInputPass"></ion-input>
-  </ion-item>
-  <ion-button type="button" color="primary" (click)="sendCredentials()" expand="block" [disabled]="connectButtonPending">
-    <span *ngIf="!connectButtonPending"> Connect </span>
-    <span *ngIf="connectButtonPending">
-      {{ connectButtonText }}<ion-spinner style="vertical-align: middle;" name="dots"></ion-spinner>
-    </span>
-  </ion-button>
+  <div style="text-align: center; margin-top: 35px;" *ngIf="spin">
+    <ion-spinner></ion-spinner>
+  </div>
+  <ion-list *ngIf="!spin">
+    <ion-item *ngFor="let network of networks" lines="full" button (click)="network.showPassAndConnect = true">
+      <ion-row>
+        <ion-text slot="start">{{network.rssi}}</ion-text>
+        <ion-text>{{network.ssid}}</ion-text>
+        <ion-text slot="end">{{network.enc}}</ion-text>
+      </ion-row>
+      <ion-row *ngIf="network.showPassAndConnect">
+        <ion-input placeholder="Password" type="password" name="userInputPass" [(ngModel)]="userInputPass"></ion-input>
+      </ion-row>
+      <ion-button type="button" color="primary" (click)="sendCredentials('network.ssid')" expand="block" [disabled]="connectButtonPending">
+        <span *ngIf="!connectButtonPending"> Connect </span>
+        <span *ngIf="connectButtonPending">
+          {{ connectButtonText }}<ion-spinner style="vertical-align: middle;" name="dots"></ion-spinner>
+        </span>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+  <ion-button type="button" color="primary" (click)="log(spin)" expand="block">spin?</ion-button>
 </ion-content>
