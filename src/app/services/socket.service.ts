@@ -62,6 +62,7 @@ export class SocketService {
           for (let i = 0; i < dataArray.length; i++) {
             dataStr += String.fromCharCode(dataArray[i]);
           }
+          console.log('dataStr', dataStr);
           if (dataStr) {
             dataStr = dataStr.replace(/\0/g, '');
             const parsed = JSON.parse(dataStr);

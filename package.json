@@ -11,7 +11,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "android:run": "ionic cap sync android && ionic cap run android -l --external --target Pixel_4_API_29 --public-host 192.168.10.104",
-    "android:build": "export CAPACITOR_ANDROID_STUDIO_PATH='/snap/android-studio/current/android-studio/bin/studio.sh' && ionic cap sync android && ionic cap run android"
+    "android:build": "export CAPACITOR_ANDROID_STUDIO_PATH='/snap/android-studio/current/android-studio/bin/studio.sh' && ionic cap sync android && ionic cap build android --target Pixel_4_API_29 --public-host 192.168.10.104"
   },
   "private": true,
   "dependencies": {

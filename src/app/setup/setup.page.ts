@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { SocketService } from '../services/socket.service';
@@ -18,7 +18,8 @@ export class SetupPage implements OnInit {
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {}
@@ -36,27 +37,34 @@ export class SetupPage implements OnInit {
     this.resetButtons();
 
     this.socketService.onDataObj(async (res) => {
-      try {
-        console.log(res);
-        if (res.code == 0) {
-          this.router.navigate([this.nextStep]);
-        } else {
-          await this.showErr(
-            `Device response is not OK: ${JSON.stringify(res)}`
-          );
+      this.ngZone.run(async () => {
+        try {
+          if (res.op === 'status') {
+            if (res.code == 0) {
+              this.router.navigate([this.nextStep]);
+            } else {
+              await this.showErr(
+                `Device response is not OK: ${JSON.stringify(res)}`
+              );
+            }
+          }
+        } catch (err) {
+          await this.showErr("Can't parse Device response");
+          await this.socketService.safeClose();
         }
-      } catch (err) {
-        await this.showErr("Can't parse Device response");
-        await this.socketService.safeClose();
-      }
+      });
     });
     this.socketService.onError(async (errorMessage) => {
-      await this.showErr(`Error: ${errorMessage}`);
-      await this.socketService.safeClose();
+      this.ngZone.run(async () => {
+        await this.showErr(`Error: ${errorMessage}`);
+        await this.socketService.safeClose();
+      });
     });
     this.socketService.onClose(async (hasError) => {
-      await this.showErr(`Socket disconnected unexpectedly ${hasError}`);
-      await this.socketService.safeClose();
+      this.ngZone.run(async () => {
+        await this.showErr(`Socket disconnected unexpectedly ${hasError}`);
+        await this.socketService.safeClose();
+      });
     });
   }
 
@@ -65,13 +73,13 @@ export class SetupPage implements OnInit {
   // }
 
   async checkBoardIP() {
-    await this.sendCheckPacket(this.userInputBoardIP);
     this.nextStep = '/lamp';
+    await this.sendCheckPacket(this.userInputBoardIP);
   }
 
   async connectBoardAP() {
-    await this.sendCheckPacket('192.168.4.1');
     this.nextStep = '/setup-2';
+    await this.sendCheckPacket('192.168.4.1');
   }
 
   async showErr(msg) {
